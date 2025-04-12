@@ -1,8 +1,8 @@
 import { createClient } from "contentful";
 
 const client = createClient({
-  space: "your-space-id",    // Replace with your space ID
-  accessToken: "your-access-token"  // Replace with your access token
+  space: "xwylc92nxbor",    // Replace with your space ID
+  accessToken: "J1EVqyVWHG_8GBJAixQERvcaValwywAhTZ4NZjcH_1U"  // Replace with your access token
 });
 
 export const fetchProducts = async () => {

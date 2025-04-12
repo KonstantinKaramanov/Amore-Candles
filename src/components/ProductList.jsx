@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
-import { fetchProducts } from "../contentful"; // Import the fetchProducts function
+import { fetchProducts } from "../contentful"; // Your Contentful fetch
 
 const ProductList = () => {
   const { addToCart } = useCart();
@@ -9,7 +9,17 @@ const ProductList = () => {
   useEffect(() => {
     const getProducts = async () => {
       const fetchedProducts = await fetchProducts();
-      setProducts(fetchedProducts);
+
+      // ✅ Normalize the structure & ensure price is a number
+      const transformed = fetchedProducts.map((item) => ({
+        id: item.sys.id,
+        name: item.fields.name,
+        description: item.fields.description,
+        price: parseFloat(item.fields.price), // ✅ Make sure it's a number
+        image: item.fields.image?.fields?.file?.url || "", // Optional chaining
+      }));
+
+      setProducts(transformed);
     };
 
     getProducts();
@@ -18,15 +28,15 @@ const ProductList = () => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {products.map((product) => (
-        <div key={product.sys.id} className="border rounded-2xl shadow p-4">
+        <div key={product.id} className="border rounded-2xl shadow p-4">
           <img
-            src={product.fields.image.fields.file.url}
-            alt={product.fields.name}
+            src={product.image}
+            alt={product.name}
             className="w-full h-48 object-cover rounded-xl"
           />
-          <h2 className="text-xl font-semibold mt-2">{product.fields.name}</h2>
-          <p className="text-gray-600">{product.fields.description}</p>
-          <p className="font-bold mt-2">${product.fields.price}</p>
+          <h2 className="text-xl font-semibold mt-2">{product.name}</h2>
+          <p className="text-gray-600">{product.description}</p>
+          <p className="font-bold mt-2">${product.price.toFixed(2)}</p>
           <button
             className="mt-2 bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600"
             onClick={() => addToCart(product)}
@@ -40,4 +50,5 @@ const ProductList = () => {
 };
 
 export default ProductList;
+
 

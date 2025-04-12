@@ -28,7 +28,7 @@ const CartPreview = ({ onClose }) => {
           </ul>
           <div className="mt-4 font-semibold">
             Total: $
-            {cart.reduce((total, item) => total + item.price, 0).toFixed(2)}
+            {cart.reduce((total, item) => total + (parseFloat(item.price) || 0), 0).toFixed(2)}
           </div>
           <button
             className="mt-2 w-full bg-pink-500 text-white py-2 rounded"

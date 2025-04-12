@@ -43,7 +43,7 @@ const ProductList = () => {
           />
           <h2 className="text-xl font-semibold mt-2">{product.name}</h2>
           <p className="text-gray-600">{product.description}</p>
-          <p className="text-sm text-gray-500 mt-1">Аромат: {product.aroma}</p>
+          
           <p className="font-bold mt-2">{formatBGN(product.price)}</p>
           <button
             className="mt-2 bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600"

@@ -17,6 +17,6 @@ export const fetchProducts = async () => {
     price: parseFloat(item.fields.price),
     image: item.fields.image?.fields?.file?.url || "",
     description: item.fields.description || "",
-    aroma: item.fields.aromaSelection || "", // Single-select dropdown value
+    // aroma: item.fields.aromaSelection || "", // Single-select dropdown value
   }));
 };

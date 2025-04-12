@@ -1,0 +1,17 @@
+/* src/custom-utilities.css */
+
+/* Custom utility class for margin */
+.m-auto {
+    margin: auto;
+  }
+  
+  /* Custom utility class for shadow */
+  .shadow-xl-custom {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Custom text color */
+  .text-brand {
+    color: #1f8f7e;
+  }
+  

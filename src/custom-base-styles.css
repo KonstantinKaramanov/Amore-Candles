@@ -1,0 +1,11 @@
+/* src/custom-base-styles.css */
+
+/* Custom base styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+  }
+  
+  /* You can also include resets or normalize here if needed */
+  

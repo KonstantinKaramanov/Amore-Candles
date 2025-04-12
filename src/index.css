@@ -1,0 +1,20 @@
+/* src/index.css */
+
+/* Import Tailwind's base styles */
+@import './tailwind-base.css';
+
+/* Import Tailwind's component styles */
+@import './tailwind-components.css';
+
+/* Import Tailwind's utility styles */
+@import './tailwind-utilities.css';
+
+/* Import custom base styles */
+@import "./custom-base-styles.css";
+
+/* Import custom component styles */
+@import "./custom-components.css";
+
+/* Import custom utility styles */
+@import "./custom-utilities.css";
+

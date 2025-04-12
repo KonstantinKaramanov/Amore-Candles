@@ -6,6 +6,12 @@ const ProductList = () => {
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
 
+  const formatBGN = (price) =>
+    new Intl.NumberFormat("bg-BG", {
+      style: "currency",
+      currency: "BGN",
+    }).format(price);
+
   useEffect(() => {
     const getProducts = async () => {
       const fetchedProducts = await fetchProducts();
@@ -15,8 +21,9 @@ const ProductList = () => {
         id: item.sys.id,
         name: item.fields.name,
         description: item.fields.description,
-        price: parseFloat(item.fields.price), // ✅ Make sure it's a number
-        image: item.fields.image?.fields?.file?.url || "", // Optional chaining
+        price: parseFloat(item.fields.price),
+        image: item.fields.image?.fields?.file?.url || "",
+        aroma: item.fields.aroma || "Неизвестен",
       }));
 
       setProducts(transformed);
@@ -36,12 +43,13 @@ const ProductList = () => {
           />
           <h2 className="text-xl font-semibold mt-2">{product.name}</h2>
           <p className="text-gray-600">{product.description}</p>
-          <p className="font-bold mt-2">${product.price.toFixed(2)}</p>
+          <p className="text-sm text-gray-500 mt-1">Аромат: {product.aroma}</p>
+          <p className="font-bold mt-2">{formatBGN(product.price)}</p>
           <button
             className="mt-2 bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600"
             onClick={() => addToCart(product)}
           >
-            Add to Cart
+            Добави в количката
           </button>
         </div>
       ))}
@@ -50,5 +58,6 @@ const ProductList = () => {
 };
 
 export default ProductList;
+
 
 

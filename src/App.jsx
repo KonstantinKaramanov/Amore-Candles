@@ -57,8 +57,6 @@ function App() {
           <ProductList />
         </main>
 
-        {/* 🛒 Full cart section (maybe used later in checkout) */}
-        <Cart />
 
         {/* ✅ Slide-in cart preview when icon clicked */}
         {isCartOpen && <CartPreview />}
@@ -73,10 +71,3 @@ function App() {
 }
 
 export default App;
-
-
-
-// {/* Header */}
-// <header className="bg-pink-100 p-4 flex justify-center items-center shadow fixed top-0 left-0 right-0 z-30 opacity-80">
-// <img src={logo} alt="Amore Candles Logo" className="h-10" />
-// </header>

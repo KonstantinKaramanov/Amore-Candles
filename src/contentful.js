@@ -10,13 +10,13 @@ export const fetchProducts = async () => {
     content_type: "product",
   });
 
-  // Map the raw Contentful entries to clean objects
   return response.items.map((item) => ({
     id: item.sys.id,
     name: item.fields.name,
     price: parseFloat(item.fields.price),
     image: item.fields.image?.fields?.file?.url || "",
     description: item.fields.description || "",
-    // aroma: item.fields.aromaSelection || "", // Single-select dropdown value
+    // aroma: item.fields.aromaSelection || "", // Removed or commented out
   }));
 };
+

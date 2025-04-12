@@ -55,7 +55,7 @@ function App() {
       Намерете перфектния аромат за всеки повод
     </p>
     <button className="bg-pink-500 bg-opacity-60 py-2 px-6 text-lg font-semibold hover:bg-opacity-80 transition duration-300">
-      Shop Now
+      <a href="#products">Купете сега</a>
     </button>
   </div>
 </div>

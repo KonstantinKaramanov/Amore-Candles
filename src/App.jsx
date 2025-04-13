@@ -50,14 +50,15 @@ function App() {
   </video>
 
   <div className="relative z-10 flex flex-col items-center justify-center h-screen text-white text-center px-4">
-    <h1 className="text-4xl font-bold mb-4">Добре дошли в Amore Candles</h1>
-    <p className="text-lg mb-8">
-      Намерете перфектния аромат за всеки повод
-    </p>
-    <button className="bg-pink-500 bg-opacity-60 py-2 px-6 text-lg font-semibold hover:bg-opacity-80 transition duration-300">
-      <a href="#products">Купете сега</a>
-    </button>
-  </div>
+  <h1 className="text-4xl font-bold mb-4 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]">
+    Добре дошли в Amore Candles
+  </h1>
+  <p className="text-lg mb-8 drop-shadow-[1px_1px_3px_rgba(0,0,0,0.7)]">
+    Намерете перфектния аромат за всеки повод
+  </p>
+  <button className="bg-pink-500 bg-opacity-60 py-2 px-6 text-lg font-semibold hover:bg-opacity-80 transition duration-300">
+    <a href="#products">Купете сега</a>
+  </button>
 </div>
 
         {/* 🕯 Product list */}

@@ -1,4 +1,4 @@
-import { createClient } from "contentful";
+*// import { createClient } from "contentful";
 
 const client = createClient({
   space: "xwylc92nxbor",
@@ -19,4 +19,27 @@ export const fetchProducts = async () => {
     description: item.fields.description || "",
     // aroma: item.fields.aromaSelection || "", // Single-select dropdown value
   }));
+}; //*
+
+import {createClient} from 
+"contentful";
+
+const client = createClient({
+
+space: "xwylc92nxbor",
+
+accessToken: "J1EVqyVWHG_8GBJAixQERvcaValwywAhTZ4NZjcH_1U",
+});
+
+export const fetchProducts = async()
+=>
+const response = await client.
+
+
+getEntries({
+content_type: "product",
+});
+
+return response.items;
+
 };

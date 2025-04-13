@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
-import { fetchProducts } from "../contentful"; // Your Contentful fetch
+import { fetchProducts } from "../contentful";
 
 const ProductList = () => {
   const { addToCart } = useCart();
@@ -15,18 +15,7 @@ const ProductList = () => {
   useEffect(() => {
     const getProducts = async () => {
       const fetchedProducts = await fetchProducts();
-
-      // ✅ Normalize the structure & ensure price is a number
-      const transformed = fetchedProducts.map((item) => ({
-        id: item.sys.id,
-        name: item.fields.name,
-        description: item.fields.description,
-        price: parseFloat(item.fields.price),
-        image: item.fields.image?.fields?.file?.url || "",
-        aroma: item.fields.aroma || "Неизвестен",
-      }));
-
-      setProducts(transformed);
+      setProducts(fetchedProducts); // Use already formatted data
     };
 
     getProducts();
@@ -43,7 +32,6 @@ const ProductList = () => {
           />
           <h2 className="text-xl font-semibold mt-2">{product.name}</h2>
           <p className="text-gray-600">{product.description}</p>
-          
           <p className="font-bold mt-2">{formatBGN(product.price)}</p>
           <button
             className="mt-2 bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600"
@@ -58,6 +46,3 @@ const ProductList = () => {
 };
 
 export default ProductList;
-
-
-

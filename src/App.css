@@ -1,4 +1,4 @@
- #root {
+#root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
@@ -39,4 +39,31 @@
 
 .read-the-docs {
   color: #888;
-} 
+}
+
+/* Shimmer Effect */
+@keyframes shimmer {
+  0% {
+    background-position: -500px 0;
+  }
+  100% {
+    background-position: 500px 0;
+  }
+}
+
+.shimmer-text {
+  display: inline-block;
+  background: linear-gradient(
+    to right,
+    #ffffff 0%,
+    #f9c8e3 20%,
+    #ffffff 40%,
+    #f9c8e3 60%,
+    #ffffff 80%,
+    #ffffff 100%
+  );
+  background-size: 1000px 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 2s infinite linear;
+}

@@ -10,7 +10,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import herovid from "./assets/herovid.mp4";
 
 // ✅ Load Stripe public key
-const stripePromise = loadStripe("pk_test_51RJbz2CSPMytO5Yuu1lkVE4s7VHWDwFQtronKZEgs3HJy27jjItiPRounFZ9ueq0t3iaDTyObZtVhkBt4zo2JYBr00ppOih5yG"); // 🔁 replace with your Stripe public key
+const stripePromise = loadStripe("pk_test_51RJbz2CSPMytO5Yuu1lkVE4s7VHWDwFQtronKZEgs3HJy27jjItiPRounFZ9ueq0t3iaDTyObZtVhkBt4zo2JYBr00ppOih5yG");
 
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -75,17 +75,15 @@ function App() {
           </main>
 
           {/* 🛒 Cart */}
-          {isCartOpen && <CartPreview />}
-
-          {/* ✅ Checkout Button (visible always or when cart open) */}
-          <div className="text-center mt-6">
-            <button
-              onClick={() => setIsCheckoutOpen(true)}
-              className="bg-green-600 text-white py-2 px-4 rounded"
-            >
-              Приключи поръчката
-            </button>
-          </div>
+          {isCartOpen && (
+            <CartPreview
+              onClose={() => setIsCartOpen(false)}
+              onCheckout={() => {
+                setIsCartOpen(false);
+                setIsCheckoutOpen(true);
+              }}
+            />
+          )}
 
           {/* ✅ Modal */}
           {isCheckoutOpen && (
@@ -103,4 +101,3 @@ function App() {
 }
 
 export default App;
-

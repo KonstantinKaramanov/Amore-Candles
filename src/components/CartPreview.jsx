@@ -1,6 +1,6 @@
-import { useCart } from '../context/CartContext';
+import { useCart } from "../context/CartContext";
 
-const CartPreview = ({ onClose }) => {
+const CartPreview = ({ onClose, onCheckout }) => {
   const { cart, removeFromCart } = useCart();
 
   const formatBGN = (price) =>
@@ -39,16 +39,16 @@ const CartPreview = ({ onClose }) => {
             )}
           </div>
           <button
-            className="mt-2 w-full bg-pink-500 text-white py-2 rounded"
-            onClick={() => alert("Плащането ще бъде добавено скоро!")}
+            className="mt-2 w-full bg-green-600 text-white py-2 rounded"
+            onClick={onCheckout}
           >
-            Плащане
+            Приключи поръчката
           </button>
         </>
       )}
     </div>
   );
 };
-
 export default CartPreview;
+
 

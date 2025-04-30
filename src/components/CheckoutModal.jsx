@@ -1,78 +1,78 @@
 import { useState, useEffect } from "react";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import { createPaymentIntent } from "../firebase";
 import { useCart } from "../context/CartContext";
+import { createPaymentIntent, sendOfficeOrder, savePaidOrder } from "../firebase";
+import DeliveryForm from "./DeliveryForm";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 export default function CheckoutModal({ isOpen, onClose }) {
   const { cart, clearCart } = useCart();
-  const [method, setMethod] = useState("card"); // "card" or "gift"
-  const total = cart.reduce((sum, i) => sum + i.price * (i.quantity || 1), 0);
+  const [mode, setMode] = useState("pay");
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white p-6 rounded-lg w-full max-w-md space-y-6">
-        <h2 className="text-2xl font-bold text-center">Плащане</h2>
-
-        {/* Toggle Buttons */}
-        <div className="flex justify-center gap-4 mb-6">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-xl w-full max-w-lg">
+        <div className="flex mb-4">
           <button
-            className={`px-4 py-2 rounded-lg ${method === "card" ? "bg-pink-600 text-white" : "bg-gray-200"}`}
-            onClick={() => setMethod("card")}
+            className={`flex-1 p-2 ${mode === "pay" ? "bg-pink-600 text-white" : "bg-gray-200"}`}
+            onClick={() => setMode("pay")}
           >
             Плати с карта
           </button>
           <button
-            className={`px-4 py-2 rounded-lg ${method === "gift" ? "bg-pink-600 text-white" : "bg-gray-200"}`}
-            onClick={() => setMethod("gift")}
+            className={`flex-1 p-2 ${mode === "office" ? "bg-pink-600 text-white" : "bg-gray-200"}`}
+            onClick={() => setMode("office")}
           >
-            Изпрати като подарък
+            Доставка до офис
           </button>
         </div>
 
-        {/* Render correct form */}
-        {method === "card" ? (
+        {mode === "pay" ? (
           <Elements stripe={stripePromise}>
-            <StripeForm total={total} onClose={onClose} onSuccess={clearCart} />
+            <StripeForm cart={cart} onClose={onClose} clearCart={clearCart} />
           </Elements>
         ) : (
-          <GiftForm onClose={onClose} onSuccess={clearCart} />
+          <OfficeForm cart={cart} onClose={onClose} clearCart={clearCart} />
         )}
       </div>
     </div>
   );
 }
 
-function StripeForm({ total, onClose, onSuccess }) {
+function StripeForm({ cart, onClose, clearCart }) {
   const stripe = useStripe();
   const elements = useElements();
   const [clientSecret, setClientSecret] = useState("");
+  const [courier, setCourier] = useState("ekont");
+  const [office, setOffice] = useState("");
+  const [note, setNote] = useState("");
+
+  const total = cart.reduce((sum, item) => sum + item.price * (item.quantity || 1), 0);
 
   useEffect(() => {
-    createPaymentIntent({ amount: total }).then(({ data }) =>
-      setClientSecret(data.clientSecret)
-    );
+    createPaymentIntent({ amount: total }).then((res) => setClientSecret(res.data.clientSecret));
   }, [total]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!stripe || !elements) return;
+    if (!office) return alert("Изберете офис за доставка.");
+
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: { return_url: window.location.href },
       redirect: "if_required",
     });
-    if (error) {
-      alert(error.message);
-    } else {
-      alert("Успешно плащане! Благодарим Ви!");
-      onSuccess();
-      onClose();
-    }
+
+    if (error) return alert(error.message);
+
+    await savePaidOrder({ cart, courier, office, note });
+    alert("Поръчката е приета!");
+    clearCart();
+    onClose();
   };
 
   if (!clientSecret) return <p>Зареждане...</p>;
@@ -80,60 +80,47 @@ function StripeForm({ total, onClose, onSuccess }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <PaymentElement />
+      <DeliveryForm {...{ courier, setCourier, office, setOffice, note, setNote }} />
       <button
         disabled={!stripe}
         className="w-full bg-pink-600 text-white py-3 rounded-lg"
       >
-        Плати {total.toFixed(2)} лв
+        Потвърди и плати {total.toFixed(2)} лв
       </button>
     </form>
   );
 }
 
-function GiftForm({ onClose, onSuccess }) {
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [message, setMessage] = useState("");
+function OfficeForm({ cart, onClose, clearCart }) {
+  const [courier, setCourier] = useState("ekont");
+  const [office, setOffice] = useState("");
+  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Gift Order:", { name, address, message });
-
-    alert("Поръчката е изпратена успешно!\nЩе се свържем с Вас за потвърждение.");
-    onSuccess();
-    onClose();
+    if (!office) return alert("Моля, изберете офис за доставка.");
+    setLoading(true);
+    try {
+      await sendOfficeOrder({ cart, courier, office, note });
+      alert("Поръчката беше изпратена успешно!");
+      clearCart();
+      onClose();
+    } catch {
+      alert("Грешка при изпращане на поръчката.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <input
-        type="text"
-        placeholder="Име на получателя"
-        className="w-full border rounded-lg p-3"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-      />
-      <textarea
-        placeholder="Адрес за доставка"
-        className="w-full border rounded-lg p-3"
-        rows="3"
-        value={address}
-        onChange={(e) => setAddress(e.target.value)}
-        required
-      />
-      <textarea
-        placeholder="Лично съобщение (по желание)"
-        className="w-full border rounded-lg p-3"
-        rows="2"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
+      <DeliveryForm {...{ courier, setCourier, office, setOffice, note, setNote }} />
       <button
-        type="submit"
+        disabled={loading}
         className="w-full bg-pink-600 text-white py-3 rounded-lg"
       >
-        Изпрати подарък
+        Потвърди поръчката (наложен платеж)
       </button>
     </form>
   );

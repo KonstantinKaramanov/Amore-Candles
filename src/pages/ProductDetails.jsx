@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchProductById } from "../contentful";
+import { fetchProductById } from "../utils/contentful";
 import { useCart } from "../context/CartContext";
 
 const ProductDetail = () => {

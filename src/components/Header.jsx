@@ -8,10 +8,10 @@ const Header = ({ onCartClick }) => {
   const { cart } = useCart(); // Access cart from context
 
   return (
-    <header className="flex items-center justify-between bg-pink-100 px-6 py-4 shadow-md sticky top-0 z-50 opacity-80">
+    <header className="flex items-center justify-between bg-pink-100 px-7 py-4 shadow-md sticky top-0 z-50 opacity-85">
       {/* Logo Section */}
       <div className="flex items-center">
-        <img src={logo} alt="Amore Candles Logo" className="h-10" />
+        <img src={logo} alt="Amore Candles Logo" className="h-11" />
         <h1 className="text-2xl font-bold text-pink-800 ml-2">{/* Removed opacity from here for now */}</h1>
       </div>
 
@@ -29,4 +29,5 @@ const Header = ({ onCartClick }) => {
 };
 
 export default Header;
+
 

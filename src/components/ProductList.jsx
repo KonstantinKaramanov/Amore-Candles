@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
-import { fetchProducts } from "../contentful";
+import { fetchProducts } from "../utils/contentful";
 
 const ProductList = () => {
   const { addToCart } = useCart();

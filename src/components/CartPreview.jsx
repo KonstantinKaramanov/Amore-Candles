@@ -19,7 +19,7 @@ const CartPreview = ({ onClose, onCheckout }) => {
       <div className="flex justify-between items-center mb-2">
         <h3 className="font-semibold text-lg">Твоята количка</h3>
         <button onClick={onClose} className="text-sm text-pink-500">
-          Затвори
+          X
         </button>
       </div>
 
@@ -44,7 +44,7 @@ const CartPreview = ({ onClose, onCheckout }) => {
           <div className="mt-4 font-semibold">Общо: {formatBGN(total)}</div>
 
           <button
-            className="mt-2 w-full bg-green-600 text-white py-2 rounded"
+            className="mt-2 w-full bg-pink-600 text-white py-2 rounded"
             onClick={onCheckout}
           >
             Приключи поръчката

@@ -1,10 +1,12 @@
-import { Link } from "react-router-dom"; 
+// App.jsx
+import { Link, Routes, Route } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import ProductList from "./components/ProductList";
 import { CartProvider, useCart } from "./context/CartContext";
 import CartPreview from "./components/CartPreview";
 import Header from "./components/Header";
 import CheckoutModal from "./components/CheckoutModal";
+import Products from "./pages/Products";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import herovid from "./assets/herovid.mp4";
@@ -59,11 +61,10 @@ function AppContent() {
             Намерете перфектния аромат за всеки повод
           </p>
           <Link to="/products">
-  <button className="bg-pink-500 bg-opacity-60 py-2 px-6 text-lg font-semibold hover:bg-opacity-80 transition duration-300">
-    Купи сега
-  </button>
-</Link>
-
+            <button className="bg-pink-500 bg-opacity-60 py-2 px-6 text-lg font-semibold hover:bg-opacity-80 transition duration-300">
+              Купи сега
+            </button>
+          </Link>
         </div>
       </div>
 
@@ -97,7 +98,10 @@ function App() {
   return (
     <CartProvider>
       <Elements stripe={stripePromise}>
-        <AppContent />
+        <Routes>
+          <Route path="/" element={<AppContent />} />
+          <Route path="/products" element={<Products />} />
+        </Routes>
       </Elements>
     </CartProvider>
   );

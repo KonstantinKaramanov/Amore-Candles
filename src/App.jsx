@@ -10,7 +10,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import herovid from "./assets/herovid.mp4";
 
 // ✅ Load Stripe public key
-const stripePromise = loadStripe("pk_test_YOUR_PUBLIC_KEY"); // 🔁 replace with your Stripe public key
+const stripePromise = loadStripe("pk_test_51RJbz2CSPMytO5Yuu1lkVE4s7VHWDwFQtronKZEgs3HJy27jjItiPRounFZ9ueq0t3iaDTyObZtVhkBt4zo2JYBr00ppOih5yG"); // 🔁 replace with your Stripe public key
 
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);

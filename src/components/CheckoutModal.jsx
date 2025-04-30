@@ -1,25 +1,70 @@
-import React, { useState } from "react";
-import { createPaymentIntent, savePaidOrder } from "../firebase";
+import React, { useState, useEffect } from "react";
+import {
+  useStripe,
+  useElements,
+  CardElement,
+} from "@stripe/react-stripe-js";
+import {
+  createPaymentIntent,
+  savePaidOrder,
+  getCourierOffices,
+} from "../firebase";
 
 const CheckoutModal = ({ cart, onClose }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [courier, setCourier] = useState("Ekont");
   const [office, setOffice] = useState("");
+  const [officeOptions, setOfficeOptions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    const fetchOffices = async () => {
+      try {
+        const res = await getCourierOffices({ courier });
+        setOfficeOptions(res.data);
+      } catch (error) {
+        console.error("Failed to load offices:", error);
+        setOfficeOptions([]);
+      }
+    };
+
+    fetchOffices();
+  }, [courier]);
 
   const handlePay = async () => {
-    try {
-      setLoading(true);
-      const result = await createPaymentIntent({ amount });
-      const clientSecret = result.data.clientSecret;
-      console.log("Client Secret:", clientSecret);
+    setLoading(true);
+    setErrorMsg("");
 
-      await savePaidOrder({ cart, courier, office, note });
-      alert("Order saved! Proceed with Stripe Elements if needed.");
-      onClose();
-    } catch (error) {
-      alert("Error during checkout: " + error.message);
+    try {
+      if (!stripe || !elements) {
+        throw new Error("Stripe not loaded yet");
+      }
+
+      const res = await createPaymentIntent({ amount });
+      const clientSecret = res.data.clientSecret;
+
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+        },
+      });
+
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+
+      if (result.paymentIntent.status === "succeeded") {
+        await savePaidOrder({ cart, courier, office, note });
+        alert("Плащането е успешно! Поръчката е приета.");
+        onClose();
+      }
+    } catch (err) {
+      setErrorMsg(err.message || "Възникна грешка при плащането.");
     } finally {
       setLoading(false);
     }
@@ -47,13 +92,18 @@ const CheckoutModal = ({ cart, onClose }) => {
           <option value="Speedy">Speedy</option>
         </select>
 
-        <input
-          type="text"
-          placeholder="Office name or ID"
+        <select
           value={office}
           onChange={(e) => setOffice(e.target.value)}
           className="border p-2 w-full mb-3"
-        />
+        >
+          <option value="">Изберете офис</option>
+          {officeOptions.map((opt) => (
+            <option key={opt.id} value={opt.name}>
+              {opt.name} — {opt.address}
+            </option>
+          ))}
+        </select>
 
         <textarea
           placeholder="Note (optional)"
@@ -62,19 +112,25 @@ const CheckoutModal = ({ cart, onClose }) => {
           className="border p-2 w-full mb-3"
         />
 
+        <div className="border p-3 rounded mb-3">
+          <CardElement options={{ hidePostalCode: true }} />
+        </div>
+
+        {errorMsg && <p className="text-red-600 text-sm mb-2">{errorMsg}</p>}
+
         <button
           onClick={handlePay}
-          className="bg-pink-500 text-white px-4 py-2 rounded w-full mb-2"
-          disabled={loading}
+          className="bg-pink-600 text-white w-full py-2 rounded mb-2"
+          disabled={loading || !stripe || !elements}
         >
-          {loading ? "Processing..." : "Pay and Submit Order"}
+          {loading ? "Обработка..." : "Плати и поръчай"}
         </button>
 
         <button
           onClick={onClose}
           className="text-sm text-gray-500 underline w-full"
         >
-          Cancel
+          Отказ
         </button>
       </div>
     </div>

@@ -1,3 +1,4 @@
+// ✅ CheckoutModal.jsx (updated)
 import React, { useState, useEffect } from "react";
 import {
   useStripe,
@@ -7,6 +8,7 @@ import {
 import {
   createPaymentIntent,
   savePaidOrder,
+  sendOfficeOrder,
   getCourierOffices,
 } from "../firebase";
 
@@ -14,11 +16,13 @@ const CheckoutModal = ({ cart, onClose }) => {
   const stripe = useStripe();
   const elements = useElements();
 
-  const [amount, setAmount] = useState("");
+  const total = cart.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+  const [amount] = useState(total);
   const [note, setNote] = useState("");
-  const [courier, setCourier] = useState("Ekont");
+  const [courier, setCourier] = useState("Speedy");
   const [office, setOffice] = useState("");
   const [officeOptions, setOfficeOptions] = useState([]);
+  const [payLater, setPayLater] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -26,37 +30,44 @@ const CheckoutModal = ({ cart, onClose }) => {
     const fetchOffices = async () => {
       try {
         const res = await getCourierOffices({ courier });
-        setOfficeOptions(res.data);
+        console.log("Offices loaded:", res.data);
+        setOfficeOptions(res.data?.data || []);
       } catch (error) {
         console.error("Failed to load offices:", error);
         setOfficeOptions([]);
       }
     };
-
     fetchOffices();
   }, [courier]);
 
-  const handlePay = async () => {
+  const handleSubmit = async () => {
     setLoading(true);
     setErrorMsg("");
 
+    if (!office) {
+      setErrorMsg("Моля, изберете офис за доставка.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      if (!stripe || !elements) {
-        throw new Error("Stripe not loaded yet");
+      if (payLater) {
+        await sendOfficeOrder({ cart, courier, office, note });
+        alert("Поръчката е приета! Ще платите при получаване.");
+        onClose();
+        return;
       }
+
+      if (!stripe || !elements) throw new Error("Stripe not loaded yet");
 
       const res = await createPaymentIntent({ amount });
       const clientSecret = res.data.clientSecret;
 
       const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-        },
+        payment_method: { card: elements.getElement(CardElement) },
       });
 
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
+      if (result.error) throw new Error(result.error.message);
 
       if (result.paymentIntent.status === "succeeded") {
         await savePaidOrder({ cart, courier, office, note });
@@ -75,14 +86,15 @@ const CheckoutModal = ({ cart, onClose }) => {
       <div className="bg-white p-6 rounded-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">Checkout</h2>
 
+        {/* Amount (disabled) */}
         <input
           type="number"
-          placeholder="Amount (BGN)"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="border p-2 w-full mb-3"
+          disabled
+          className="border p-2 w-full mb-3 bg-gray-100 cursor-not-allowed"
         />
 
+        {/* Courier Select */}
         <select
           value={courier}
           onChange={(e) => setCourier(e.target.value)}
@@ -92,36 +104,51 @@ const CheckoutModal = ({ cart, onClose }) => {
           <option value="Speedy">Speedy</option>
         </select>
 
+        {/* Office Select */}
         <select
           value={office}
           onChange={(e) => setOffice(e.target.value)}
           className="border p-2 w-full mb-3"
         >
           <option value="">Изберете офис</option>
-          {officeOptions.map((opt) => (
-            <option key={opt.id} value={opt.name}>
+          {officeOptions.map((opt, index) => (
+            <option key={index} value={opt.name || opt.address}>
               {opt.name} — {opt.address}
             </option>
           ))}
         </select>
 
+        {/* Optional note */}
         <textarea
           placeholder="Note (optional)"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="border p-2 w-full mb-3"
+          className="border p-2 w-full mb-3 resize-none"
         />
 
-        <div className="border p-3 rounded mb-3">
-          <CardElement options={{ hidePostalCode: true }} />
-        </div>
+        {/* Payment method toggle */}
+        <label className="flex items-center mb-3">
+          <input
+            type="checkbox"
+            checked={payLater}
+            onChange={() => setPayLater(!payLater)}
+            className="mr-2"
+          />
+          Плащане при доставка (в офис)
+        </label>
+
+        {!payLater && (
+          <div className="border p-3 rounded mb-3">
+            <CardElement options={{ hidePostalCode: true }} />
+          </div>
+        )}
 
         {errorMsg && <p className="text-red-600 text-sm mb-2">{errorMsg}</p>}
 
         <button
-          onClick={handlePay}
+          onClick={handleSubmit}
           className="bg-pink-600 text-white w-full py-2 rounded mb-2"
-          disabled={loading || !stripe || !elements}
+          disabled={loading || (!payLater && (!stripe || !elements))}
         >
           {loading ? "Обработка..." : "Плати и поръчай"}
         </button>

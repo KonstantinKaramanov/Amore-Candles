@@ -8,12 +8,8 @@ const Stripe = require("stripe");
 admin.initializeApp();
 const db = admin.firestore();
 
-// 🔐 Stripe will be initialized inside the function using process.env
-// STRIPE_SECRET must be set using Firebase Secret Manager
-// Run: firebase functions:secrets:set STRIPE_SECRET
-
+// Use secret set with: firebase functions:secrets:set STRIPE_SECRET
 exports.createPaymentIntent = functions
-  .region("us-central1")
   .runWith({ secrets: ["STRIPE_SECRET"], timeoutSeconds: 60, memory: "256MB" })
   .onCall(async (data) => {
     const stripe = new Stripe(process.env.STRIPE_SECRET, {
@@ -21,6 +17,7 @@ exports.createPaymentIntent = functions
     });
 
     const { amount } = data;
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100),
       currency: "bgn",
@@ -30,33 +27,26 @@ exports.createPaymentIntent = functions
     return { clientSecret: paymentIntent.client_secret };
   });
 
-exports.sendOfficeOrder = functions
-  .region("us-central1")
-  .onCall(async (data) => {
-    const { cart, courier, office, note } = data;
-    await db.collection("officeOrders").add({
-      cart,
-      courier,
-      office,
-      note,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-    return { success: true };
+exports.sendOfficeOrder = functions.onCall(async (data) => {
+  const { cart, courier, office, note } = data;
+  await db.collection("officeOrders").add({
+    cart,
+    courier,
+    office,
+    note,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
   });
+  return { success: true };
+});
 
-exports.savePaidOrder = functions
-  .region("us-central1")
-  .onCall(async (data) => {
-    const { cart, courier, office, note } = data;
-    await db.collection("paidOrders").add({
-      cart,
-      courier,
-      office,
-      note,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-    return { success: true };
+exports.savePaidOrder = functions.onCall(async (data) => {
+  const { cart, courier, office, note } = data;
+  await db.collection("paidOrders").add({
+    cart,
+    courier,
+    office,
+    note,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
   });
-
-
-  
+  return { success: true };
+});

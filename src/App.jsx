@@ -1,31 +1,23 @@
 // App.jsx
-import { Link, Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation, Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import ProductList from "./components/ProductList";
 import { CartProvider, useCart } from "./context/CartContext";
 import CartPreview from "./components/CartPreview";
 import Header from "./components/Header";
 import CheckoutModal from "./components/CheckoutModal";
 import Products from "./pages/Products";
+import ProductList from "./components/ProductList";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import herovid from "./assets/herovid.mp4";
 
 const stripePromise = loadStripe("pk_test_51RJbz2CSPMytO5Yuu1lkVE4s7VHWDwFQtronKZEgs3HJy27jjItiPRounFZ9ueq0t3iaDTyObZtVhkBt4zo2JYBr00ppOih5yG");
 
-function AppContent() {
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const { cart } = useCart();
-
-  const handleCartClick = () => {
-    setIsCartOpen((prev) => !prev);
-  };
-
+function HomePage({ onCheckout }) {
   useEffect(() => {
     const videoElement = document.getElementById("hero-video");
-    const preventContextMenu = (event) => event.preventDefault();
-    const preventTouchStart = (event) => event.preventDefault();
+    const preventContextMenu = (e) => e.preventDefault();
+    const preventTouchStart = (e) => e.preventDefault();
 
     if (videoElement) {
       videoElement.addEventListener("contextmenu", preventContextMenu);
@@ -39,9 +31,7 @@ function AppContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-gray-800 font-sans">
-      <Header onCartClick={handleCartClick} />
-
+    <>
       <div className="relative min-h-screen overflow-hidden">
         <video
           id="hero-video"
@@ -52,7 +42,6 @@ function AppContent() {
           playsInline
         >
           <source src={herovid} type="video/mp4" />
-          Your browser does not support the video tag.
         </video>
 
         <div className="relative z-10 flex flex-col items-center justify-center h-screen text-white text-center px-4">
@@ -70,16 +59,36 @@ function AppContent() {
 
       <main className="pt-32 p-6" id="products">
         <h1 className="text-3xl font-semibold mb-4 text-center">Нашите свещи</h1>
-        <ProductList />
+        <ProductList onCheckout={onCheckout} />
       </main>
+    </>
+  );
+}
+
+function Layout() {
+  const { cart } = useCart();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const location = useLocation();
+
+  const openCheckout = () => {
+    setIsCartOpen(false);
+    setIsCheckoutOpen(true);
+  };
+
+  return (
+    <>
+      <Header onCartClick={() => setIsCartOpen(!isCartOpen)} />
+
+      <Routes>
+        <Route path="/" element={<HomePage onCheckout={openCheckout} />} />
+        <Route path="/products" element={<Products onCheckout={openCheckout} />} />
+      </Routes>
 
       {isCartOpen && (
         <CartPreview
           onClose={() => setIsCartOpen(false)}
-          onCheckout={() => {
-            setIsCartOpen(false);
-            setIsCheckoutOpen(true);
-          }}
+          onCheckout={openCheckout}
         />
       )}
 
@@ -87,10 +96,12 @@ function AppContent() {
         <CheckoutModal cart={cart} onClose={() => setIsCheckoutOpen(false)} />
       )}
 
-      <footer className="bg-pink-100 p-4 text-center text-sm mt-10">
-        &copy; 2025 Amore Candles Boutique. All rights reserved.
-      </footer>
-    </div>
+      {location.pathname === "/" && (
+        <footer className="bg-pink-100 p-4 text-center text-sm mt-10">
+          &copy; 2025 Amore Candles Boutique. All rights reserved.
+        </footer>
+      )}
+    </>
   );
 }
 
@@ -98,14 +109,12 @@ function App() {
   return (
     <CartProvider>
       <Elements stripe={stripePromise}>
-        <Routes>
-          <Route path="/" element={<AppContent />} />
-          <Route path="/products" element={<Products />} />
-        </Routes>
+        <Layout />
       </Elements>
     </CartProvider>
   );
 }
 
 export default App;
+
 

@@ -1,21 +1,21 @@
-// src/components/Header.jsx
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import { ShoppingCart } from 'lucide-react';
-import logo from "../assets/logo.png"; // Import your logo here
+import { Link } from 'react-router-dom';
+import logo from "../assets/logo.png";
 
 const Header = ({ onCartClick }) => {
-  const { cart } = useCart(); // Access cart from context
+  const { cart } = useCart();
 
   return (
-    <header className="flex items-center justify-between bg-pink-100 px-7 py-4 shadow-md sticky top-0 z-50 opacity-85">
-      {/* Logo Section */}
-      <div className="flex items-center">
-        <img src={logo} alt="Amore Candles Logo" className="h-11" />
-        <h1 className="text-2xl font-bold text-pink-800 ml-2">{/* Removed opacity from here for now */}</h1>
-      </div>
+    <header className="flex items-center justify-between bg-pink-100 px-6 py-4 shadow-md sticky top-0 z-50 opacity-80">
+      {/* ✅ Logo (clickable to home) */}
+      <Link to="/" className="flex items-center">
+        <img src={logo} alt="Amore Candles Logo" className="h-12" />
+        <h1 className="text-2xl font-bold text-pink-800 ml-2"></h1>
+      </Link>
 
-      {/* Cart Icon Section */}
+      {/* ✅ Cart Icon */}
       <button className="relative" onClick={onCartClick}>
         <ShoppingCart className="w-6 h-6 text-pink-800" />
         {cart.length > 0 && (
@@ -29,5 +29,6 @@ const Header = ({ onCartClick }) => {
 };
 
 export default Header;
+
 
 

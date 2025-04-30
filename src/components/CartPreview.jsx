@@ -19,7 +19,7 @@ const CartPreview = ({ onClose, onCheckout }) => {
       <div className="flex justify-between items-center mb-2">
         <h3 className="font-semibold text-lg">Твоята количка</h3>
         <button onClick={onClose} className="text-sm text-pink-500">
-          X
+          x
         </button>
       </div>
 

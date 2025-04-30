@@ -1,4 +1,4 @@
-// ✅ CheckoutModal.jsx (updated)
+// ✅ CheckoutModal.jsx (updated button label + amount format)
 import React, { useState, useEffect } from "react";
 import {
   useStripe,
@@ -16,8 +16,14 @@ const CheckoutModal = ({ cart, onClose }) => {
   const stripe = useStripe();
   const elements = useElements();
 
-  const total = cart.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
-  const [amount] = useState(total);
+  const rawTotal = cart.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+  const formattedTotal = new Intl.NumberFormat("bg-BG", {
+    style: "decimal",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(rawTotal);
+
+  const [amount] = useState(rawTotal);
   const [note, setNote] = useState("");
   const [courier, setCourier] = useState("Speedy");
   const [office, setOffice] = useState("");
@@ -86,10 +92,10 @@ const CheckoutModal = ({ cart, onClose }) => {
       <div className="bg-white p-6 rounded-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">Checkout</h2>
 
-        {/* Amount (disabled) */}
+        {/* Amount (formatted, disabled) */}
         <input
-          type="number"
-          value={amount}
+          type="text"
+          value={formattedTotal}
           disabled
           className="border p-2 w-full mb-3 bg-gray-100 cursor-not-allowed"
         />
@@ -150,7 +156,11 @@ const CheckoutModal = ({ cart, onClose }) => {
           className="bg-pink-600 text-white w-full py-2 rounded mb-2"
           disabled={loading || (!payLater && (!stripe || !elements))}
         >
-          {loading ? "Обработка..." : "Плати и поръчай"}
+          {loading
+            ? "Обработка..."
+            : payLater
+            ? "Поръчай"
+            : "Плати и поръчай"}
         </button>
 
         <button
@@ -165,5 +175,6 @@ const CheckoutModal = ({ cart, onClose }) => {
 };
 
 export default CheckoutModal;
+
 
 

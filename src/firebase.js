@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getAnalytics } from "firebase/analytics";
 
+
 // ✅ Correct Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCYuzbIxt1Xj3SmRUKO2rteHw5dSgZ2hE8",
@@ -25,3 +26,4 @@ const functions = getFunctions(app);
 export const createPaymentIntent = httpsCallable(functions, "createPaymentIntent");
 export const sendOfficeOrder = httpsCallable(functions, "sendOfficeOrder");
 export const savePaidOrder = httpsCallable(functions, "savePaidOrder");
+export const getCourierOffices = httpsCallable(functions, "getCourierOffices");

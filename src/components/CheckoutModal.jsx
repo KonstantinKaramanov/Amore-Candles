@@ -1,127 +1,86 @@
-import { useState, useEffect } from "react";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { useCart } from "../context/CartContext";
-import { createPaymentIntent, sendOfficeOrder, savePaidOrder } from "../firebase";
-import DeliveryForm from "./DeliveryForm";
+import React, { useState } from "react";
+import { createPaymentIntent, savePaidOrder } from "../firebase";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
-export default function CheckoutModal({ isOpen, onClose }) {
-  const { cart, clearCart } = useCart();
-  const [mode, setMode] = useState("pay");
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-xl w-full max-w-lg">
-        <div className="flex mb-4">
-          <button
-            className={`flex-1 p-2 ${mode === "pay" ? "bg-pink-600 text-white" : "bg-gray-200"}`}
-            onClick={() => setMode("pay")}
-          >
-            Плати с карта
-          </button>
-          <button
-            className={`flex-1 p-2 ${mode === "office" ? "bg-pink-600 text-white" : "bg-gray-200"}`}
-            onClick={() => setMode("office")}
-          >
-            Доставка до офис
-          </button>
-        </div>
-
-        {mode === "pay" ? (
-          <Elements stripe={stripePromise}>
-            <StripeForm cart={cart} onClose={onClose} clearCart={clearCart} />
-          </Elements>
-        ) : (
-          <OfficeForm cart={cart} onClose={onClose} clearCart={clearCart} />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function StripeForm({ cart, onClose, clearCart }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [clientSecret, setClientSecret] = useState("");
-  const [courier, setCourier] = useState("ekont");
-  const [office, setOffice] = useState("");
+const CheckoutModal = ({ cart, onClose }) => {
+  const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
-
-  const total = cart.reduce((sum, item) => sum + item.price * (item.quantity || 1), 0);
-
-  useEffect(() => {
-    createPaymentIntent({ amount: total }).then((res) => setClientSecret(res.data.clientSecret));
-  }, [total]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!office) return alert("Изберете офис за доставка.");
-
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: { return_url: window.location.href },
-      redirect: "if_required",
-    });
-
-    if (error) return alert(error.message);
-
-    await savePaidOrder({ cart, courier, office, note });
-    alert("Поръчката е приета!");
-    clearCart();
-    onClose();
-  };
-
-  if (!clientSecret) return <p>Зареждане...</p>;
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <PaymentElement />
-      <DeliveryForm {...{ courier, setCourier, office, setOffice, note, setNote }} />
-      <button
-        disabled={!stripe}
-        className="w-full bg-pink-600 text-white py-3 rounded-lg"
-      >
-        Потвърди и плати {total.toFixed(2)} лв
-      </button>
-    </form>
-  );
-}
-
-function OfficeForm({ cart, onClose, clearCart }) {
-  const [courier, setCourier] = useState("ekont");
+  const [courier, setCourier] = useState("Ekont");
   const [office, setOffice] = useState("");
-  const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!office) return alert("Моля, изберете офис за доставка.");
-    setLoading(true);
+  const handlePay = async () => {
     try {
-      await sendOfficeOrder({ cart, courier, office, note });
-      alert("Поръчката беше изпратена успешно!");
-      clearCart();
+      setLoading(true);
+      const result = await createPaymentIntent({ amount });
+      const clientSecret = result.data.clientSecret;
+      console.log("Client Secret:", clientSecret);
+
+      await savePaidOrder({ cart, courier, office, note });
+      alert("Order saved! Proceed with Stripe Elements if needed.");
       onClose();
-    } catch {
-      alert("Грешка при изпращане на поръчката.");
+    } catch (error) {
+      alert("Error during checkout: " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <DeliveryForm {...{ courier, setCourier, office, setOffice, note, setNote }} />
-      <button
-        disabled={loading}
-        className="w-full bg-pink-600 text-white py-3 rounded-lg"
-      >
-        Потвърди поръчката (наложен платеж)
-      </button>
-    </form>
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
+      <div className="bg-white p-6 rounded-lg w-full max-w-md">
+        <h2 className="text-xl font-bold mb-4">Checkout</h2>
+
+        <input
+          type="number"
+          placeholder="Amount (BGN)"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className="border p-2 w-full mb-3"
+        />
+
+        <select
+          value={courier}
+          onChange={(e) => setCourier(e.target.value)}
+          className="border p-2 w-full mb-3"
+        >
+          <option value="Ekont">Ekont</option>
+          <option value="Speedy">Speedy</option>
+        </select>
+
+        <input
+          type="text"
+          placeholder="Office name or ID"
+          value={office}
+          onChange={(e) => setOffice(e.target.value)}
+          className="border p-2 w-full mb-3"
+        />
+
+        <textarea
+          placeholder="Note (optional)"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          className="border p-2 w-full mb-3"
+        />
+
+        <button
+          onClick={handlePay}
+          className="bg-pink-500 text-white px-4 py-2 rounded w-full mb-2"
+          disabled={loading}
+        >
+          {loading ? "Processing..." : "Pay and Submit Order"}
+        </button>
+
+        <button
+          onClick={onClose}
+          className="text-sm text-gray-500 underline w-full"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
   );
-}
+};
+
+export default CheckoutModal;
+
+

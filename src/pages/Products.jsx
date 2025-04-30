@@ -1,11 +1,22 @@
-import ProductList from "../components/ProductList";
-export default function Products() {
+import React, { useEffect, useState } from "react";
+import { fetchProductsFromContentful } from "../utils/contentful";
+import ProductCard from "./ProductCard";
+
+const ProductList = () => {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    fetchProductsFromContentful().then(setProducts);
+  }, []);
+
   return (
-    <main className="pt-24 p-6">
-      <h1 className="text-3xl font-semibold text-center mb-6">
-        Нашите свещи
-      </h1>
-      <ProductList />
-    </main>
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {products.map((item) => (
+        <ProductCard key={item.id} product={item} />
+      ))}
+    </div>
   );
-}
+};
+
+export default ProductList;
+

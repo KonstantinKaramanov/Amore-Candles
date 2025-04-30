@@ -1,3 +1,5 @@
+
+// This file is responsible for fetching data from Contentful
 import { createClient } from "contentful";
 
 const client = createClient({
@@ -5,19 +7,45 @@ const client = createClient({
   accessToken: "J1EVqyVWHG_8GBJAixQERvcaValwywAhTZ4NZjcH_1U",
 });
 
-export const fetchProducts = async () => {
-  const response = await client.getEntries({
-    content_type: "product",
+// 🔁 Fetch all products
+export async function fetchProducts() {
+  const entries = await client.getEntries({ content_type: "product" });
+
+  return entries.items.map((item) => {
+    const imagesField = item.fields.image;
+
+    const imagesArray = Array.isArray(imagesField)
+      ? imagesField
+      : imagesField
+      ? [imagesField]
+      : [];
+
+    return {
+      id: item.sys.id,
+      name: item.fields.name,
+      description: item.fields.description,
+      price: item.fields.price,
+      images: imagesArray.map((img) => "https:" + img.fields.file.url),
+    };
   });
+}
 
-  return response.items.map((item) => ({
-    id: item.sys.id,
-    name: item.fields.name,
-    price: parseFloat(item.fields.price),
-    image: item.fields.image?.fields?.file?.url || "",
-    description: item.fields.description || "",
-    // aroma: item.fields.aromaSelection || "", // Removed or commented out
-  }));
-};
+// 🔍 Fetch a single product by ID
+export async function fetchProductById(id) {
+  const entry = await client.getEntry(id);
 
+  const imagesField = entry.fields.image;
+  const imagesArray = Array.isArray(imagesField)
+    ? imagesField
+    : imagesField
+    ? [imagesField]
+    : [];
 
+  return {
+    id: entry.sys.id,
+    name: entry.fields.name,
+    description: entry.fields.description,
+    price: entry.fields.price,
+    images: imagesArray.map((img) => "https:" + img.fields.file.url),
+  };
+}

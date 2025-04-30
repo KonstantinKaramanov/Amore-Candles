@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"; 
 import React, { useState, useEffect } from "react";
 import ProductList from "./components/ProductList";
 import { CartProvider, useCart } from "./context/CartContext";
@@ -57,9 +58,12 @@ function AppContent() {
           <p className="text-lg mb-8 drop-shadow-[1px_1px_3px_rgba(0,0,0,0.7)]">
             Намерете перфектния аромат за всеки повод
           </p>
-          <button className="bg-pink-500 bg-opacity-60 py-2 px-6 text-lg font-semibold hover:bg-opacity-80 transition duration-300">
-            <a href="#products">Купете сега</a>
-          </button>
+          <Link to="/products">
+  <button className="bg-pink-500 bg-opacity-60 py-2 px-6 text-lg font-semibold hover:bg-opacity-80 transition duration-300">
+    Купи сега
+  </button>
+</Link>
+
         </div>
       </div>
 

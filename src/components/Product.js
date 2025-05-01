@@ -1,18 +1,15 @@
+// src/pages/Products.jsx
+
 import React from 'react';
-import { useCart } from '../context/CartContext';
+import ProductList from '../components/ProductList';
 
-const Product = ({ product }) => {
-  const { addToCart } = useCart();
-
+const Products = () => {
   return (
-    <div>
-      <h3>{product.name}</h3>
-      <p>${product.price}</p>
-      <button onClick={() => addToCart(product)}>Add to Cart</button>
-    </div>
+    <main className="pt-24 p-6">
+      <h1 className="text-3xl font-semibold text-center mb-6">Нашите свещи</h1>
+      <ProductList showFullDescription={true} />
+    </main>
   );
 };
 
-export default Product;
-
-
+export default Products;

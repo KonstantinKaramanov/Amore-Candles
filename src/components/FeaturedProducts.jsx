@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchFeaturedProducts } from "../utils/contentful";
+import { fetchFeaturedProducts } from "../contentful";
 import ProductCard from "./ProductCard";
 
 export default function FeaturedProducts() {

@@ -1,64 +1,59 @@
 // src/components/CartPreview.jsx
+import React from "react";
+import { useCart } from "../context/CartContext";
 
-import React from 'react';
-import { useCart } from '../context/CartContext';
-
-const CartPreview = ({ onClose, onCheckout }) => {
-  const { cart, increaseQty, decreaseQty, removeFromCart } = useCart();
-
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+export default function CartPreview({ onClose, onCheckout }) {
+  const { cart, removeFromCart } = useCart();
+  const total = cart.reduce(
+    (sum, x) => sum + x.price * x.quantity,
+    0
+  );
 
   return (
-    <div className="fixed top-0 right-0 w-80 h-full bg-white shadow-lg p-4 z-50 overflow-y-auto">
-      <h2 className="text-xl font-semibold mb-4">Количка</h2>
+    <div className="fixed top-16 right-4 bg-white shadow-lg rounded-lg w-80 z-50 border border-pink-200 p-4">
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="font-semibold text-lg">Твоята количка</h3>
+        <button onClick={onClose} className="text-sm text-pink-500">
+          Затвори
+        </button>
+      </div>
       {cart.length === 0 ? (
-        <p>Количката е празна.</p>
+        <p className="text-sm text-gray-500">Количката е празна.</p>
       ) : (
-        <ul>
-          {cart.map((item) => (
-            <li key={item.id} className="mb-4">
-              <div className="flex justify-between items-center">
-                <span>{item.name}</span>
-                <div className="flex items-center">
-                  <button
-                    onClick={() => decreaseQty(item.id)}
-                    className="px-2 py-1 bg-gray-200"
-                  >
-                    –
-                  </button>
-                  <span className="mx-2">{item.quantity}</span>
-                  <button
-                    onClick={() => increaseQty(item.id)}
-                    className="px-2 py-1 bg-gray-200"
-                  >
-                    +
-                  </button>
-                </div>
+        <>
+          <ul className="space-y-2 max-h-48 overflow-auto">
+            {cart.map((item) => (
+              <li
+                key={item.id}
+                className="flex justify-between items-center"
+              >
+                <span>
+                  {item.name} × {item.quantity}
+                </span>
                 <button
                   onClick={() => removeFromCart(item.id)}
-                  className="text-red-500 text-sm ml-2"
+                  className="text-xs text-red-500"
                 >
                   Премахни
                 </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 font-semibold">
+            Общо:{" "}
+            {new Intl.NumberFormat("bg-BG", {
+              style: "currency",
+              currency: "BGN",
+            }).format(total)}
+          </div>
+          <button
+            onClick={onCheckout}
+            className="mt-4 w-full bg-pink-500 text-white py-2 rounded"
+          >
+            Приключи поръчката
+          </button>
+        </>
       )}
-      <div className="mt-4">
-        <p className="font-semibold">Общо: {total.toFixed(2)} лв</p>
-        <button
-          onClick={onCheckout}
-          className="mt-2 bg-pink-500 text-white px-4 py-2 rounded"
-        >
-          Поръчай
-        </button>
-      </div>
-      <button onClick={onClose} className="absolute top-2 right-2 text-gray-600">
-        ✕
-      </button>
     </div>
   );
-};
-
-export default CartPreview;
+}

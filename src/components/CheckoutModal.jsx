@@ -91,8 +91,8 @@ export default function CheckoutModal({ cart, onClose }) {
           value={courier}
           onChange={(e) => setCourier(e.target.value)}
         >
-          <option value="Ekont">Ekont</option>
           <option value="Speedy">Speedy</option>
+     <option value="Ekont">Ekont</option>
         </select>
 
         {/* Interactive Map */}

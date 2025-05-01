@@ -16,8 +16,8 @@ export default function DeliveryForm({ courier, setCourier, office, setOffice, n
         onChange={(e) => setCourier(e.target.value)}
         className="w-full p-2 border rounded"
       >
-        <option value="ekont">Еконт</option>
         <option value="speedy">Спиди</option>
+<option value="ekont">Еконт</option>
       </select>
 
       <select

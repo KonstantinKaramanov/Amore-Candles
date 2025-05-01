@@ -1,4 +1,4 @@
-// src/components/CheckoutModal.jsx import React, { useState } from "react"; import { createPaymentIntent, sendOfficeOrder, savePaidOrder, } from "../firebase";
+import React, { useState } from "react"; import { createPaymentIntent, sendOfficeOrder, savePaidOrder, } from "../firebase";
 
 export default function CheckoutModal({ cart, onClose }) { const [name, setName] = useState(""); const [email, setEmail] = useState(""); const [phone, setPhone] = useState(""); const [courier, setCourier] = useState("Ekont"); const [office, setOffice] = useState(""); const [note, setNote] = useState(""); const [paymentMethod, setPaymentMethod] = useState("cod"); const [loading, setLoading] = useState(false);
 

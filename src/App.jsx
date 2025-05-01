@@ -1,4 +1,3 @@
-// App.jsx
 import { Routes, Route, useLocation, Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { CartProvider, useCart } from "./context/CartContext";
@@ -59,7 +58,15 @@ function HomePage({ onCheckout }) {
 
       <main className="pt-32 p-6" id="products">
         <h1 className="text-3xl font-semibold mb-4 text-center">Нашите свещи</h1>
-        <ProductList onCheckout={onCheckout} />
+        <ProductList featuredOnly onCheckout={onCheckout} />
+        <div className="text-center mt-8">
+          <Link
+            to="/products"
+            className="inline-block bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-600 transition duration-300"
+          >
+            Виж всички продукти
+          </Link>
+        </div>
       </main>
     </>
   );

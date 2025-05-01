@@ -106,7 +106,6 @@ className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md"
       </button>
     </div>
   </form>
-</div>
-
-); }
-
+    </div>
+  );
+}

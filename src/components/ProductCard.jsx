@@ -1,39 +1,47 @@
 // src/components/ProductCard.jsx
-import React from "react";
-import { Link } from "react-router-dom";
-import { useCart } from "../context/CartContext";
 
-const ProductCard = ({ product }) => {
+import React from 'react';
+import { useCart } from '../context/CartContext';
+
+const ProductCard = ({ product, showFullDescription = false }) => {
   const { addToCart } = useCart();
 
+  const truncatedDescription =
+    product.description.length > 60
+      ? product.description.slice(0, 60) + '...'
+      : product.description;
+
   return (
-    <div className="border rounded-2xl shadow p-4 bg-white">
-      <Link to={`/product/${product.id}`}>
-        <div className="grid grid-cols-2 gap-2 mb-3">
-          {product.images.slice(0, 2).map((img, i) => (
-            <img
-              key={i}
-              src={img}
-              alt={`${product.name} ${i + 1}`}
-              className="w-full h-40 object-cover rounded"
-            />
+    <div className="border p-4 rounded shadow">
+      <img
+        src={product.images[0]}
+        alt={product.name}
+        className="w-full h-48 object-cover mb-2"
+      />
+      <h3 className="text-lg font-semibold">{product.name}</h3>
+      <p className="text-gray-600">
+        {showFullDescription ? product.description : truncatedDescription}
+      </p>
+      {showFullDescription && product.aromas && product.aromas.length > 0 && (
+        <select className="mt-2 border rounded px-2 py-1">
+          {product.aromas.map((aroma, index) => (
+            <option key={index} value={aroma}>
+              {aroma}
+            </option>
           ))}
-        </div>
-        <h2 className="text-xl font-semibold mt-2 hover:underline">{product.name}</h2>
-      </Link>
-
-      <p className="text-gray-600 mb-2">{product.description}</p>
-      <p className="font-bold text-pink-600">{product.price.toFixed(2)} лв.</p>
-
-      <button
-        onClick={() => addToCart(product)}
-        className="mt-2 bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 w-full"
-      >
-        Добави в количката
-      </button>
+        </select>
+      )}
+      <div className="mt-2 flex justify-between items-center">
+        <span className="text-pink-600 font-bold">{product.price} лв</span>
+        <button
+          onClick={() => addToCart(product)}
+          className="bg-pink-500 text-white px-4 py-1 rounded"
+        >
+          Добави в количката
+        </button>
+      </div>
     </div>
   );
 };
 
 export default ProductCard;
-

@@ -1,6 +1,6 @@
 // src/App.jsx
-import React, { useState, useEffect } from "react";
-import { Routes, Route, useLocation, Link, BrowserRouter } from "react-router-dom";
+import React, { useState } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider, useCart } from "./context/CartContext";
 import Header from "./components/Header";
 import CartPreview from "./components/CartPreview";
@@ -55,12 +55,10 @@ function Layout() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <CartProvider>
-        <Elements stripe={stripePromise}>
-          <Layout />
-        </Elements>
-      </CartProvider>
-    </BrowserRouter>
+    <CartProvider>
+      <Elements stripe={stripePromise}>
+        <Layout />
+      </Elements>
+    </CartProvider>
   );
 }

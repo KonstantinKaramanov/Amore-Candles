@@ -1,10 +1,9 @@
 // src/components/ProductList.jsx
+import React, { useEffect, useState } from "react";
+import { fetchProducts } from "../utils/contentful";
+import ProductCard from "./ProductCard";
 
-import React, { useEffect, useState } from 'react';
-import { fetchProducts } from '../utils/contentful';
-import ProductCard from './ProductCard';
-
-const ProductList = ({ showFullDescription = false }) => {
+const ProductList = ({ onCheckout, showFullDescription }) => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -22,6 +21,7 @@ const ProductList = ({ showFullDescription = false }) => {
           key={product.id}
           product={product}
           showFullDescription={showFullDescription}
+          onCheckout={onCheckout}
         />
       ))}
     </div>

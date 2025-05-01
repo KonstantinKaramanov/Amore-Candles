@@ -1,6 +1,5 @@
 // pages/Products.jsx
 import React, { useEffect, useState } from "react";
-import { fetchProducts } from "../utils/contentful";
 import ProductCard from "../components/ProductCard";
 import { fetchProducts } from "../contentful";
 

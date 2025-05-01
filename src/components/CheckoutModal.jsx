@@ -1,4 +1,4 @@
-// src/components/CheckoutModal.jsx import React, { useState } from "react"; import { createPaymentIntent, sendOfficeOrder, savePaidOrder } from "../firebase";
+
 
 const CheckoutModal = ({ cart, onClose }) => { const [courier, setCourier] = useState("Ekont"); const [office, setOffice] = useState(""); const [note, setNote] = useState(""); const [email, setEmail] = useState(""); const [name, setName] = useState(""); const [phone, setPhone] = useState(""); const [paymentMethod, setPaymentMethod] = useState("cod"); const [isSubmitting, setIsSubmitting] = useState(false);
 

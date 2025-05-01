@@ -1,7 +1,7 @@
 // src/components/ProductList.jsx
 import React, { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
-import { fetchProducts } from "../contentful";
+import { fetchProducts } from "../../contentful";
 
 export default function ProductList({ featuredOnly = false, onCheckout }) {
   const [products, setProducts] = useState([]);

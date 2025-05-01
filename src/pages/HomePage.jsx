@@ -38,9 +38,9 @@ export default function HomePage({ onCheckout }) {
             Намерете перфектния аромат за всеки повод
           </p>
           <Link to="/products">
-            <button className="relative overflow-hidden px-6 py-2 text-lg font-semibold text-white bg-pink-500 rounded-lg shadow-lg hover:bg-pink-600 transition duration-300">
-  <span className="relative z-10">Купи сега ✨</span>
-  <span className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/40 to-white/20 opacity-0 hover:opacity-100 animate-shimmer" />
+           <button className="relative bg-pink-500 bg-opacity-60 py-2 px-6 text-lg font-semibold rounded overflow-hidden hover:bg-opacity-80 transition duration-300">
+  <span className="relative z-10 text-white">Купи сега</span>
+  <span className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/30 to-white/10 animate-shimmer bg-[length:200%_100%] opacity-50" />
 </button>
           </Link>
         </div>

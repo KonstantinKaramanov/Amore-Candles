@@ -28,14 +28,15 @@ export default function CheckoutModal({ cart, onClose }) {
     setLoading(true);
 
     const payload = {
-      cart,
-      name,
-      email,
-      phone,
-      courier,
-      office,
-      note,
+      cart: cart || [],
+      name: name || "",
+      email: email || "",
+      phone: phone || "",
+      courier: courier || "",
+      office: office || "",
+      note: note || "",
     };
+    
 
     try {
       if (paymentMethod === "cod") {

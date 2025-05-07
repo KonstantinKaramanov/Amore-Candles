@@ -20,12 +20,22 @@ export default function CheckoutModal({ cart, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (total <= 0) {
+    if (!cart || cart.length === 0) {
       alert("Количката е празна.");
       return;
     }
+
     setLoading(true);
-    const payload = { cart, name, email, phone, courier, office, note };
+
+    const payload = {
+      cart,
+      name,
+      email,
+      phone,
+      courier,
+      office,
+      note,
+    };
 
     try {
       if (paymentMethod === "cod") {
@@ -33,9 +43,14 @@ export default function CheckoutModal({ cart, onClose }) {
         alert("Поръчката е приета! Ще платите в офис.");
       } else {
         await savePaidOrder(payload);
-        await createPaymentIntent({ amount: total });
-        // use response.clientSecret with Stripe Elements if implemented
-        alert("Поръчката е приета! Ще платите с карта.");
+        const response = await createPaymentIntent({ amount: total });
+        const clientSecret = response.data?.clientSecret;
+        if (clientSecret) {
+          alert("Поръчката е приета! Моля, завършете плащането.");
+          // Optionally redirect or use Stripe Elements here
+        } else {
+          throw new Error("Невалиден отговор от Stripe.");
+        }
       }
       onClose();
     } catch (err) {
@@ -65,49 +80,20 @@ export default function CheckoutModal({ cart, onClose }) {
         )}
 
         <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium">Име и фамилия</label>
-            <input
-              className="w-full border rounded p-2"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
+          <label className="block text-sm font-medium">Име и фамилия</label>
+          <input className="w-full border rounded p-2" required value={name} onChange={(e) => setName(e.target.value)} />
 
-          <div>
-            <label className="block text-sm font-medium">Имейл</label>
-            <input
-              type="email"
-              className="w-full border rounded p-2"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+          <label className="block text-sm font-medium">Имейл</label>
+          <input type="email" className="w-full border rounded p-2" required value={email} onChange={(e) => setEmail(e.target.value)} />
 
-          <div>
-            <label className="block text-sm font-medium">Телефон</label>
-            <input
-              type="tel"
-              className="w-full border rounded p-2"
-              required
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
+          <label className="block text-sm font-medium">Телефон</label>
+          <input type="tel" className="w-full border rounded p-2" required value={phone} onChange={(e) => setPhone(e.target.value)} />
 
-          <div>
-            <label className="block text-sm font-medium">Куриер</label>
-            <select
-              className="w-full border rounded p-2"
-              value={courier}
-              onChange={(e) => setCourier(e.target.value)}
-            >
-              <option value="Speedy">Speedy</option>
-              <option value="Ekont">Ekont</option>
-            </select>
-          </div>
+          <label className="block text-sm font-medium">Куриер</label>
+          <select className="w-full border rounded p-2" value={courier} onChange={(e) => setCourier(e.target.value)}>
+            <option value="Speedy">Speedy</option>
+            <option value="Ekont">Ekont</option>
+          </select>
 
           {courier === "Speedy" && (
             <iframe
@@ -130,37 +116,17 @@ export default function CheckoutModal({ cart, onClose }) {
             />
           )}
 
-          <div>
-            <label className="block text-sm font-medium">Адрес или офис</label>
-            <input
-              className="w-full border rounded p-2"
-              placeholder="Въведете адреса или офиса"
-              value={office}
-              onChange={(e) => setOffice(e.target.value)}
-            />
-          </div>
+          <label className="block text-sm font-medium">Адрес или офис</label>
+          <input className="w-full border rounded p-2" placeholder="Въведете адреса или офиса" value={office} onChange={(e) => setOffice(e.target.value)} />
 
-          <div>
-            <label className="block text-sm font-medium">Бележка (по избор)</label>
-            <textarea
-              className="w-full border rounded p-2"
-              rows={2}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-          </div>
+          <label className="block text-sm font-medium">Бележка (по избор)</label>
+          <textarea className="w-full border rounded p-2" rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
 
-          <div>
-            <label className="block text-sm font-medium">Метод на плащане</label>
-            <select
-              className="w-full border rounded p-2"
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            >
-              <option value="cod">Плащане при доставка</option>
-              <option value="card">Карта</option>
-            </select>
-          </div>
+          <label className="block text-sm font-medium">Метод на плащане</label>
+          <select className="w-full border rounded p-2" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+            <option value="cod">Плащане при доставка</option>
+            <option value="card">Карта</option>
+          </select>
 
           <div className="text-right font-semibold text-pink-700 mt-2 mb-3">
             Общо: {total.toFixed(2)} лв.
@@ -168,18 +134,10 @@ export default function CheckoutModal({ cart, onClose }) {
         </div>
 
         <div className="flex justify-between items-center">
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-600 hover:text-black"
-          >
+          <button type="button" onClick={onClose} className="text-gray-600 hover:text-black">
             Отказ
           </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition"
-          >
+          <button type="submit" disabled={loading} className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition">
             {paymentMethod === "cod" ? "Поръчай" : "Плати с карта"}
           </button>
         </div>

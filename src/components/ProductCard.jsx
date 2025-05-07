@@ -2,7 +2,7 @@
 import React from "react";
 import { useCart } from "../context/CartContext";
 
-export default function ProductCard({ product, onCheckout }) {
+export default function ProductCard({ product }) {
   const { addToCart } = useCart();
 
   const handleAdd = () => {

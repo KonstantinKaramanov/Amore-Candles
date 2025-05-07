@@ -16,9 +16,7 @@ export default function CheckoutModal({ cart, onClose }) {
   const [loading, setLoading] = useState(false);
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const qualifiesForFreeDelivery = total >= 100;
-  const showFreeDelivery =
-    qualifiesForFreeDelivery && paymentMethod === "card";
+  const qualifiesForFreeDelivery = paymentMethod === "card" && total >= 100;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,8 +33,9 @@ export default function CheckoutModal({ cart, onClose }) {
         alert("Поръчката е приета! Ще платите в офис.");
       } else {
         await savePaidOrder(payload);
-        const { data } = await createPaymentIntent({ amount: total });
-        // use data.clientSecret if using Stripe Elements
+        await createPaymentIntent({ amount: total });
+        // use response.clientSecret with Stripe Elements if implemented
+        alert("Поръчката е приета! Ще платите с карта.");
       }
       onClose();
     } catch (err) {
@@ -55,15 +54,13 @@ export default function CheckoutModal({ cart, onClose }) {
       >
         <h2 className="text-xl font-bold mb-4 text-center">Завършване на поръчка</h2>
 
+        <div className="text-center text-sm font-medium mb-2 p-2 rounded bg-blue-100 text-blue-700">
+          Доставката до офис е за сметка на получателя.
+        </div>
+
         {qualifiesForFreeDelivery && (
-          <div
-            className={`text-center text-sm font-medium mb-4 p-2 rounded ${
-              paymentMethod === "card"
-                ? "bg-green-100 text-green-800"
-                : "bg-yellow-100 text-yellow-700"
-            }`}
-          >
-            Безплатна доставка при поръчки над 100 лв {paymentMethod === "card" ? "с карта!" : "— избери карта за безплатна доставка!"}
+          <div className="text-center text-sm font-medium mb-4 p-2 rounded bg-green-100 text-green-800">
+            Безплатна доставка при поръчки над 100 лв с карта!
           </div>
         )}
 

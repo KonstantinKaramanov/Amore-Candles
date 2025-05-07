@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import { fetchProducts } from "../contentful";
+import { useCart } from "../context/CartContext"; // Adjust the path as needed
 
 export default function Products({ onCheckout }) {
   const [products, setProducts] = useState([]);

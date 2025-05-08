@@ -16,6 +16,7 @@ exports.createPaymentIntent = functions.https.onCall({
   });
 
   const { amount } = data;
+
   const paymentIntent = await stripe.paymentIntents.create({
     amount: Math.round(amount * 100),
     currency: "bgn",
@@ -25,8 +26,13 @@ exports.createPaymentIntent = functions.https.onCall({
   return { clientSecret: paymentIntent.client_secret };
 });
 
+// 🔍 Clean & validate cart
 function sanitizeCart(cart) {
-  if (!Array.isArray(cart)) return [];
+  if (!Array.isArray(cart)) {
+    console.warn("Cart is not an array:", cart);
+    return [];
+  }
+
   return cart.map(item => ({
     id: item?.id ?? "",
     name: item?.name ?? "",
@@ -35,9 +41,10 @@ function sanitizeCart(cart) {
   }));
 }
 
+// 📦 Build safe order object
 function sanitizeOrder(data) {
-  return {
-    cart: sanitizeCart(data.cart),
+  const order = {
+    cart: sanitizeCart(data?.cart),
     courier: data?.courier ?? "",
     office: data?.office ?? "",
     note: data?.note ?? "",
@@ -46,19 +53,39 @@ function sanitizeOrder(data) {
     phone: data?.phone ?? "",
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   };
+
+  console.log("📥 Sanitized order:", order); // 🪵 Helpful debug
+  return order;
 }
 
 exports.sendOfficeOrder = functions.https.onCall(async (data) => {
-  const order = sanitizeOrder(data);
-  await db.collection("officeOrders").add(order);
-  return { success: true };
+  try {
+    console.log("🚚 sendOfficeOrder received:", data);
+
+    const order = sanitizeOrder(data);
+    await db.collection("officeOrders").add(order);
+
+    return { success: true };
+  } catch (error) {
+    console.error("❌ sendOfficeOrder failed:", error);
+    throw new functions.https.HttpsError("internal", error.message);
+  }
 });
 
 exports.savePaidOrder = functions.https.onCall(async (data) => {
-  const order = sanitizeOrder(data);
-  await db.collection("paidOrders").add(order);
-  return { success: true };
+  try {
+    console.log("💳 savePaidOrder received:", data);
+
+    const order = sanitizeOrder(data);
+    await db.collection("paidOrders").add(order);
+
+    return { success: true };
+  } catch (error) {
+    console.error("❌ savePaidOrder failed:", error);
+    throw new functions.https.HttpsError("internal", error.message);
+  }
 });
+
 
 
 // ❌ Temporarily disabled courier office lookup

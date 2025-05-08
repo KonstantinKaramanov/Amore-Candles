@@ -8,25 +8,40 @@ const Stripe = require("stripe");
 admin.initializeApp();
 const db = admin.firestore();
 
+// 🔐 Stripe Payment Intent
 exports.createPaymentIntent = functions.https.onCall({
   secrets: ["STRIPE_SECRET"]
-}, async (data) => {
-  const stripe = new Stripe(process.env.STRIPE_SECRET, {
-    apiVersion: "2022-11-15",
-  });
+}, async (request) => {
+  try {
+    const data = request.data;
+    console.log("🧾 PaymentIntent received:", data);
 
-  const { amount } = data;
+    const stripe = new Stripe(process.env.STRIPE_SECRET, {
+      apiVersion: "2022-11-15",
+    });
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: Math.round(amount * 100),
-    currency: "bgn",
-    automatic_payment_methods: { enabled: true },
-  });
+    const { amount } = data;
 
-  return { clientSecret: paymentIntent.client_secret };
+    if (!amount || isNaN(amount)) {
+      throw new Error("Invalid amount passed");
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100),
+      currency: "bgn",
+      automatic_payment_methods: { enabled: true },
+    });
+
+    console.log("✅ PaymentIntent created:", paymentIntent.id);
+
+    return { clientSecret: paymentIntent.client_secret };
+  } catch (error) {
+    console.error("❌ createPaymentIntent error:", error);
+    throw new functions.https.HttpsError("internal", error.message);
+  }
 });
 
-// 🔍 Clean & validate cart
+// 🧼 Helper to sanitize cart array
 function sanitizeCart(cart) {
   if (!Array.isArray(cart)) {
     console.warn("Cart is not an array:", cart);
@@ -41,7 +56,7 @@ function sanitizeCart(cart) {
   }));
 }
 
-// 📦 Build safe order object
+// 🧼 Helper to sanitize full order data
 function sanitizeOrder(data) {
   const order = {
     cart: sanitizeCart(data?.cart),
@@ -54,12 +69,14 @@ function sanitizeOrder(data) {
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   };
 
-  console.log("📥 Sanitized order:", order); // 🪵 Helpful debug
+  console.log("📦 Sanitized order:", order);
   return order;
 }
 
-exports.sendOfficeOrder = functions.https.onCall(async (data) => {
+// 🚚 COD order
+exports.sendOfficeOrder = functions.https.onCall(async (request) => {
   try {
+    const data = request.data;
     console.log("🚚 sendOfficeOrder received:", data);
 
     const order = sanitizeOrder(data);
@@ -72,8 +89,10 @@ exports.sendOfficeOrder = functions.https.onCall(async (data) => {
   }
 });
 
-exports.savePaidOrder = functions.https.onCall(async (data) => {
+// 💳 Paid order
+exports.savePaidOrder = functions.https.onCall(async (request) => {
   try {
+    const data = request.data;
     console.log("💳 savePaidOrder received:", data);
 
     const order = sanitizeOrder(data);
@@ -85,6 +104,7 @@ exports.savePaidOrder = functions.https.onCall(async (data) => {
     throw new functions.https.HttpsError("internal", error.message);
   }
 });
+
 
 
 

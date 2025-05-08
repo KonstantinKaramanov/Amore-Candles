@@ -2,8 +2,6 @@ import { initializeApp } from "firebase/app";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getAnalytics } from "firebase/analytics";
 
-
-// ✅ Correct Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB-Nps3106JWU6I4jR3ZpLE_BDZoQnsdRY",
   authDomain: "amore-candles-boutique.firebaseapp.com",
@@ -14,14 +12,11 @@ const firebaseConfig = {
   measurementId: "G-0Y14LHY640"
 };
 
-// ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// ✅ Enable optional analytics (no harm in keeping it)
 getAnalytics(app);
 
-// ✅ Set up callable Cloud Functions
-const functions = getFunctions(app);
+// ✅ FIXED: add region
+const functions = getFunctions(app, "us-central1");
 
 export const createPaymentIntent = httpsCallable(functions, "createPaymentIntent");
 export const sendOfficeOrder = httpsCallable(functions, "sendOfficeOrder");

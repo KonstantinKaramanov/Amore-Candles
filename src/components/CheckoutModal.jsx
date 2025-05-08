@@ -30,6 +30,7 @@ export default function CheckoutModal({ cart = [], onClose }) {
     if (total <= 0) return alert("Количката е празна.");
     if (!validateEmail(email)) return alert("Моля, въведете валиден имейл адрес.");
     if (!validatePhone(phone)) return alert("Моля, въведете валиден телефонен номер с поне 10 цифри.");
+    if (!office.trim()) return alert("Моля, въведете адрес или офис.");
 
     setLoading(true);
 

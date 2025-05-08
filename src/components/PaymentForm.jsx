@@ -39,6 +39,7 @@ export default function PaymentForm({ clientSecret, onSuccess, onError }) {
       <div className="p-3 border rounded bg-gray-50 mb-4">
         <CardElement
           options={{
+            hidePostalCode: true, // ✅ Hides the ZIP/postal code
             style: {
               base: {
                 fontSize: "16px",

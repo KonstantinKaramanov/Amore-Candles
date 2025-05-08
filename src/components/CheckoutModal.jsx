@@ -5,7 +5,7 @@ import {
   savePaidOrder,
 } from "../firebase";
 
-export default function CheckoutModal({ cart, onClose }) {
+export default function CheckoutModal({ cart = [], onClose }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -15,28 +15,61 @@ export default function CheckoutModal({ cart, onClose }) {
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [loading, setLoading] = useState(false);
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = (Array.isArray(cart) ? cart : []).reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
   const qualifiesForFreeDelivery = paymentMethod === "card" && total >= 100;
+
+  const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const validatePhone = (phone) => {
+    const digits = phone.replace(/\D/g, "");
+    return digits.length >= 10;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!cart || cart.length === 0) {
+
+    if (total <= 0) {
       alert("Количката е празна.");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      alert("Моля, въведете валиден имейл адрес.");
+      return;
+    }
+
+    if (!validatePhone(phone)) {
+      alert("Моля, въведете валиден телефонен номер с поне 10 цифри.");
       return;
     }
 
     setLoading(true);
 
+    const sanitizedCart = Array.isArray(cart)
+      ? cart.map(({ id, name, price, quantity }) => ({
+          id,
+          name,
+          price,
+          quantity,
+        }))
+      : [];
+
     const payload = {
-      cart: cart || [],
-      name: name || "",
-      email: email || "",
-      phone: phone || "",
-      courier: courier || "",
-      office: office || "",
-      note: note || "",
+      cart: sanitizedCart,
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      courier,
+      office: office.trim(),
+      note: note.trim(),
     };
-    
+
+    console.log("Final payload before send:", payload);
 
     try {
       if (paymentMethod === "cod") {
@@ -44,14 +77,8 @@ export default function CheckoutModal({ cart, onClose }) {
         alert("Поръчката е приета! Ще платите в офис.");
       } else {
         await savePaidOrder(payload);
-        const response = await createPaymentIntent({ amount: total });
-        const clientSecret = response.data?.clientSecret;
-        if (clientSecret) {
-          alert("Поръчката е приета! Моля, завършете плащането.");
-          // Optionally redirect or use Stripe Elements here
-        } else {
-          throw new Error("Невалиден отговор от Stripe.");
-        }
+        await createPaymentIntent({ amount: total });
+        alert("Поръчката е приета! Ще платите с карта.");
       }
       onClose();
     } catch (err) {
@@ -81,20 +108,49 @@ export default function CheckoutModal({ cart, onClose }) {
         )}
 
         <div className="space-y-3">
-          <label className="block text-sm font-medium">Име и фамилия</label>
-          <input className="w-full border rounded p-2" required value={name} onChange={(e) => setName(e.target.value)} />
+          <div>
+            <label className="block text-sm font-medium">Име и фамилия</label>
+            <input
+              className="w-full border rounded p-2"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
-          <label className="block text-sm font-medium">Имейл</label>
-          <input type="email" className="w-full border rounded p-2" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <div>
+            <label className="block text-sm font-medium">Имейл</label>
+            <input
+              type="email"
+              className="w-full border rounded p-2"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-          <label className="block text-sm font-medium">Телефон</label>
-          <input type="tel" className="w-full border rounded p-2" required value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <div>
+            <label className="block text-sm font-medium">Телефон</label>
+            <input
+              type="tel"
+              className="w-full border rounded p-2"
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
 
-          <label className="block text-sm font-medium">Куриер</label>
-          <select className="w-full border rounded p-2" value={courier} onChange={(e) => setCourier(e.target.value)}>
-            <option value="Speedy">Speedy</option>
-            <option value="Ekont">Ekont</option>
-          </select>
+          <div>
+            <label className="block text-sm font-medium">Куриер</label>
+            <select
+              className="w-full border rounded p-2"
+              value={courier}
+              onChange={(e) => setCourier(e.target.value)}
+            >
+              <option value="Speedy">Speedy</option>
+              <option value="Ekont">Ekont</option>
+            </select>
+          </div>
 
           {courier === "Speedy" && (
             <iframe
@@ -117,17 +173,37 @@ export default function CheckoutModal({ cart, onClose }) {
             />
           )}
 
-          <label className="block text-sm font-medium">Адрес или офис</label>
-          <input className="w-full border rounded p-2" placeholder="Въведете адреса или офиса" value={office} onChange={(e) => setOffice(e.target.value)} />
+          <div>
+            <label className="block text-sm font-medium">Адрес или офис</label>
+            <input
+              className="w-full border rounded p-2"
+              placeholder="Въведете адреса или офиса"
+              value={office}
+              onChange={(e) => setOffice(e.target.value)}
+            />
+          </div>
 
-          <label className="block text-sm font-medium">Бележка (по избор)</label>
-          <textarea className="w-full border rounded p-2" rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
+          <div>
+            <label className="block text-sm font-medium">Бележка (по избор)</label>
+            <textarea
+              className="w-full border rounded p-2"
+              rows={2}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+          </div>
 
-          <label className="block text-sm font-medium">Метод на плащане</label>
-          <select className="w-full border rounded p-2" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-            <option value="cod">Плащане при доставка</option>
-            <option value="card">Карта</option>
-          </select>
+          <div>
+            <label className="block text-sm font-medium">Метод на плащане</label>
+            <select
+              className="w-full border rounded p-2"
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            >
+              <option value="cod">Плащане при доставка</option>
+              <option value="card">Карта</option>
+            </select>
+          </div>
 
           <div className="text-right font-semibold text-pink-700 mt-2 mb-3">
             Общо: {total.toFixed(2)} лв.
@@ -135,10 +211,18 @@ export default function CheckoutModal({ cart, onClose }) {
         </div>
 
         <div className="flex justify-between items-center">
-          <button type="button" onClick={onClose} className="text-gray-600 hover:text-black">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-600 hover:text-black"
+          >
             Отказ
           </button>
-          <button type="submit" disabled={loading} className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition">
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition"
+          >
             {paymentMethod === "cod" ? "Поръчай" : "Плати с карта"}
           </button>
         </div>
@@ -146,3 +230,4 @@ export default function CheckoutModal({ cart, onClose }) {
     </div>
   );
 }
+

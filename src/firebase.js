@@ -5,13 +5,13 @@ import { getAnalytics } from "firebase/analytics";
 
 // ✅ Correct Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyCYuzbIxt1Xj3SmRUKO2rteHw5dSgZ2hE8",
-  authDomain: "amore-candles.firebaseapp.com",
-  projectId: "amore-candles",
-  storageBucket: "amore-candles.appspot.com", // ✅ fixed typo here
-  messagingSenderId: "392312168587",
-  appId: "1:392312168587:web:d0b35c3f92de87a6c2f48e",
-  measurementId: "G-EQWD50X814"
+  apiKey: "AIzaSyB-Nps3106JWU6I4jR3ZpLE_BDZoQnsdRY",
+  authDomain: "amore-candles-boutique.firebaseapp.com",
+  projectId: "amore-candles-boutique",
+  storageBucket: "amore-candles-boutique.firebasestorage.app",
+  messagingSenderId: "1037443017067",
+  appId: "1:1037443017067:web:0e3a19ee3b8b21c184842e",
+  measurementId: "G-0Y14LHY640"
 };
 
 // ✅ Initialize Firebase

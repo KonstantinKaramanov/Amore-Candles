@@ -4,7 +4,6 @@
 const functions = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 const Stripe = require("stripe");
-// const axios = require("axios");
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -26,35 +25,41 @@ exports.createPaymentIntent = functions.https.onCall({
   return { clientSecret: paymentIntent.client_secret };
 });
 
-exports.sendOfficeOrder = functions.https.onCall(async (data) => {
-  const { cart, courier, office, note, name, email, phone } = data;
-  await db.collection("officeOrders").add({
-    cart,
-    courier,
-    office,
-    note,
-    name,
-    email,
-    phone,
+function sanitizeCart(cart) {
+  if (!Array.isArray(cart)) return [];
+  return cart.map(item => ({
+    id: item?.id ?? "",
+    name: item?.name ?? "",
+    price: item?.price ?? 0,
+    quantity: item?.quantity ?? 1,
+  }));
+}
+
+function sanitizeOrder(data) {
+  return {
+    cart: sanitizeCart(data.cart),
+    courier: data?.courier ?? "",
+    office: data?.office ?? "",
+    note: data?.note ?? "",
+    name: data?.name ?? "",
+    email: data?.email ?? "",
+    phone: data?.phone ?? "",
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
+  };
+}
+
+exports.sendOfficeOrder = functions.https.onCall(async (data) => {
+  const order = sanitizeOrder(data);
+  await db.collection("officeOrders").add(order);
   return { success: true };
 });
 
 exports.savePaidOrder = functions.https.onCall(async (data) => {
-  const { cart, courier, office, note, name, email, phone } = data;
-  await db.collection("paidOrders").add({
-    cart,
-    courier,
-    office,
-    note,
-    name,
-    email,
-    phone,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
+  const order = sanitizeOrder(data);
+  await db.collection("paidOrders").add(order);
   return { success: true };
 });
+
 
 // ❌ Temporarily disabled courier office lookup
 /*

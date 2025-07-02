@@ -121,7 +121,7 @@ export default function CheckoutModal({ cart = [], onClose }) {
 
           <div className="mt-4 space-y-2">
             <div className="text-center text-sm font-medium p-2 rounded bg-blue-100 text-blue-700">
-              Доставката до офис е за сметка на получателя.
+              Доставката е за сметка на получателя.
             </div>
             {qualifiesForFreeDelivery && (
               <div className="text-center text-sm font-medium p-2 rounded bg-green-100 text-green-800">

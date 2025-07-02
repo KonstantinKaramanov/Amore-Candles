@@ -35,7 +35,7 @@ export default function HomePage({ onCheckout }) {
             Добре дошли в Amore Candles
           </h1>
           <p className="text-lg mb-8 drop-shadow-[1px_1px_3px_rgba(0,0,0,0.7)]">
-            Намерете перфектния аромат за всеки повод
+            Намерете перфектния подарък за всеки повод
           </p>
           <Link to="/products">
            <button className="relative bg-pink-500 bg-opacity-60 py-2 px-6 text-lg font-semibold rounded overflow-hidden hover:bg-opacity-80 transition duration-300">
